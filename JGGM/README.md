@@ -39,5 +39,5 @@ outper-forms state-of-the-art condensation techniques.
 
 ## Run
 `python JGGM_main.py --dataset dblp --cond 0.001 `
-`
+
 
