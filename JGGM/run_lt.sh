@@ -31,11 +31,5 @@ python hgcond_main.py --dataset imdb --cond 0.02 2>&1 | tee -a $output_file
 # python hgcond_main.py --dataset freebase --cond 0.01 2>&1 | tee -a $output_file
 # python hgcond_main.py --dataset freebase --cond 0.02 2>&1 | tee -a $output_file
 
-# # AMiner 数据集
-# echo "Running models for aminer dataset"
-# python hgcond_main.py --dataset aminer --cond 0.0001 2>&1 | tee -a $output_file
-# python hgcond_main.py --dataset aminer --cond 0.0005 2>&1 | tee -a $output_file
-# python hgcond_main.py --dataset aminer --cond 0.001 2>&1 | tee -a $output_file
-# python hgcond_main.py --dataset aminer --cond 0.0015 2>&1 | tee -a $output_file
 
 echo "All models processed."
