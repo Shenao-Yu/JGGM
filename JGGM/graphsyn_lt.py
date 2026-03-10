@@ -96,11 +96,7 @@ def cluster_initialize(data, num_syn_dict, model_name, architecture, opt_paramet
         print('Clustering for initialization.')
         
         for node_type, h in h_dict.items():
-            ###############################################################设置断点查看D的形状将原本的欧氏距离修改成余弦相似度并返回D可匹配的形状
             D = common_lt.euclidian_dist(h.numpy(), h.numpy())
-            # # D = torch.randn(h.shape[0], 10).numpy() 
-
-            # ############################################################
             # Initialize LeadingTree
             lt = LeadingTree(h.numpy(),dc = 0.12,lt_num=num_syn_dict[node_type], D=D )    
             lt.fit()
