@@ -96,17 +96,13 @@ def cluster_initialize(data, num_syn_dict, model_name, architecture, opt_paramet
         print('Clustering for initialization.')
         
         for node_type, h in h_dict.items():
-            # k_means = BisectingKMeans(n_clusters=num_syn_dict[node_type], random_state=0)
-            # k_means.fit(h)
-            # cluster_dict[node_type] = torch.LongTensor(k_means.predict(h))
             ###############################################################设置断点查看D的形状将原本的欧氏距离修改成余弦相似度并返回D可匹配的形状
             D = common_lt.euclidian_dist(h.numpy(), h.numpy())
             # # D = torch.randn(h.shape[0], 10).numpy() 
 
             # ############################################################
-            # 初始化 LeadingTree
+            # Initialize LeadingTree
             lt = LeadingTree(h.numpy(),dc = 0.12,lt_num=num_syn_dict[node_type], D=D )    
-            # 调用 fit 方法进行聚类
             lt.fit()
             cluster_labels = np.empty(len(h), dtype=int)
             for i, indices in enumerate(lt.AL):
@@ -399,7 +395,7 @@ def hgcond(data, cond_rate, feat_init, para_init, basicmodel, model_architecture
 
     # 参数：粗粒度滑动窗口
     k = cond_train.get('window_k')
-    alpha_weights = cond_train.get('alpha_weights', [1.0 / (k + 1)] * (k + 1))  # 权重
+    alpha_weights = cond_train.get('alpha_weights', [1.0 / (k + 1)] * (k + 1))  
 
 
     for initial_i in tqdm(range(cond_train['epochs_initial']), desc='Condensation', ncols=80):
@@ -412,7 +408,7 @@ def hgcond(data, cond_rate, feat_init, para_init, basicmodel, model_architecture
         optimizer_basic_model = torch.optim.Adam(basic_model.parameters(), lr=cond_train['lr_basic_model'])
         loss_avg = 0
 
-        ##### ------- 第一阶段：细粒度训练（使用余弦相似度） -------
+        ##### ------- First Stage -------
         for step_fine in range(cond_train['epochs_fine']):
             basic_model.eval()
 
@@ -433,7 +429,7 @@ def hgcond(data, cond_rate, feat_init, para_init, basicmodel, model_architecture
             loss_cos.backward()
             optimizer_cond.step()
             
-            # 同步训练模型参数
+
             if step_fine < cond_train['epochs_fine'] - 1:
                 x_syn_detach = graphsyner.get_x_syn_detached_dict()
                 adj_t_detach = graphsyner.get_adj_t_syn_detached_dict()
@@ -441,7 +437,7 @@ def hgcond(data, cond_rate, feat_init, para_init, basicmodel, model_architecture
 
                 loss_avg += loss_cos.item() /( cond_train['epochs_fine'] + cond_train['epochs_coarse'])
 
-        #### ------- 第二阶段：粗粒度训练 -------
+        #### ------- Second Stage -------
         grad_real_window = deque(maxlen=k )
 
 
@@ -451,14 +447,14 @@ def hgcond(data, cond_rate, feat_init, para_init, basicmodel, model_architecture
             x_syn_dict = graphsyner.get_x_syn_dict()
             adj_t_syn_dict = graphsyner.get_adj_t_syn_dict()
 
-            # 真实图梯度（只作为参考）
+
             output = basic_model(x_dict, adj_t_dict)
             loss_real = F.nll_loss(output[train_mask], y[train_mask])
             gw_real = torch.autograd.grad(loss_real, parameters)
             gw_real = list((_.detach().clone() for _ in gw_real))
             grad_real_window.append([g for g in gw_real])
             
-            # 合成图梯度（保留计算图）
+
             output_syn = basic_model(x_syn_dict, adj_t_syn_dict)[mask_syn]
             loss_syn = F.nll_loss(output_syn, y_syn[mask_syn])
             gw_syn = torch.autograd.grad(loss_syn, parameters, create_graph=True)
@@ -478,7 +474,7 @@ def hgcond(data, cond_rate, feat_init, para_init, basicmodel, model_architecture
                 optimizer_cond.step()
 
                 loss_avg += loss.item() / (cond_train['epochs_fine'] + cond_train['epochs_coarse'])
-            # 同步训练模型参数
+
             if step_coarse < cond_train['epochs_coarse'] - 1:
                 x_syn_detach = graphsyner.get_x_syn_detached_dict()
                 adj_t_detach = graphsyner.get_adj_t_syn_detached_dict()
