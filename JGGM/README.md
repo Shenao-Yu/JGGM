@@ -1,4 +1,4 @@
-# Heterogeneous Graph Condensation
+# Heterogeneous Graph Condensation via Joint-Granularity Gradient Matching
 
 **Abstract**—Heterogeneous graph neural networks are predominant in modeling  real-world 
 relations between entities. However, their scalability to accommodate large graphs has been  
